@@ -1,50 +1,9 @@
 # Real-time-Path-planning-with-SEPSO
 This is the code of the paper [XXX](https://arxiv.org/abs/XXX). 
 
-<div align="center">
-<img width="100%" height="auto" src="https://github.com/XinJingHao/Images/blob/main/Sparrow_V0/color_img.png">
-</div>
-
-<br/>
-<br/>
-
-## Actor-Sharer-Learner (ASL): An Efficient Training Framework for Off-policy Deep Reinforcement Learning
-<div align="center">
-  <a ><img width="1200px" height="auto" src="https://github.com/XinJingHao/Images/blob/main/asl/ASL.jpg"></a>
-</div>  
-
-<br/>
-<br/>
-
-  The trianing curves of ASL on 57 [Atari](https://www.gymlibrary.dev/environments/atari/) games are listed as follows.
-
-<div align="center">
-<img width="100%" height="auto" src="https://github.com/XinJingHao/Images/blob/main/asl/ss_e.svg">
-</div>
-
-
-
-<br/>
-<br/>
-
-## Sparrow: A Reinforcement Learning Friendly Simulator for Mobile Robot
-
-<div align="center">
-<img width="100%" height="auto" src="https://github.com/XinJingHao/Images/blob/main/Sparrow_V0/Show_SparrowV0.gif">
-</div>
-
-<br/>
-<br/>
-
-## Real-world assessment of Color
-
-<div align="center">
-<img width="100%" height="auto" src="https://github.com/XinJingHao/Images/blob/main/asl/real36.jpg">
-</div>
-
-
-<br/>
-<br/>
+  |                           Static Path Planning with DTPSO                           |                         Dynamic Path Planning with SEPSO                          |
+  | :----------------------------------------------------------: | :----------------------------------------------------------: |
+  | <img src="[https://github.com/XinJingHao/Prioritized-DQN-DDQN-Pytorch/blob/main/PriorDQN_gym0.1x/IMGs/CPV1.svg](https://github.com/XinJingHao/Real-time-Path-planning-with-SEPSO/blob/main/Code_for_Path_Plannning/Static%20Path%20Planning%20with%20DTPSO/static.gif)" width="320" height="200"> | <img src="[https://github.com/XinJingHao/Prioritized-DQN-DDQN-Pytorch/blob/main/PriorDQN_gym0.1x/IMGs/LLDV2.svg](https://github.com/XinJingHao/Real-time-Path-planning-with-SEPSO/blob/main/Code_for_Path_Plannning/Dynamic%20Path%20Planning%20with%20SEPSO(Application%20Phrase)/dynamic.gif)" width="320" height="200"> |
 
 ## Citing the Project
 
