@@ -3,7 +3,17 @@ This is the code of the paper [XXX](https://arxiv.org/abs/XXX).
 
   |                           Static Path Planning with DTPSO                           |                         Dynamic Path Planning with SEPSO                          |
   | :----------------------------------------------------------: | :----------------------------------------------------------: |
-  | <img src="[https://github.com/XinJingHao/Prioritized-DQN-DDQN-Pytorch/blob/main/PriorDQN_gym0.1x/IMGs/CPV1.svg](https://github.com/XinJingHao/Real-time-Path-planning-with-SEPSO/blob/main/Code_for_Path_Plannning/Static%20Path%20Planning%20with%20DTPSO/static.gif)" width="320" height="200"> | <img src="[https://github.com/XinJingHao/Prioritized-DQN-DDQN-Pytorch/blob/main/PriorDQN_gym0.1x/IMGs/LLDV2.svg](https://github.com/XinJingHao/Real-time-Path-planning-with-SEPSO/blob/main/Code_for_Path_Plannning/Dynamic%20Path%20Planning%20with%20SEPSO(Application%20Phrase)/dynamic.gif)" width="320" height="200"> |
+  | <img src="https://github.com/XinJingHao/Real-time-Path-planning-with-SEPSO/blob/main/Code_for_Path_Plannning/Static%20Path%20Planning%20with%20DTPSO/static.gif" width="320" height="320"> | <img src="https://github.com/XinJingHao/Real-time-Path-planning-with-SEPSO/blob/main/Code_for_Path_Plannning/Dynamic%20Path%20Planning%20with%20SEPSO(Application%20Phrase)/dynamic.gif" width="320" height="320"> |
+
+## dependencies 
+```python
+torch==2.0.1
+numpy==1.24.3
+pygame==2.1.3
+tensorboard==2.13.0
+python==3.10.3
+```
+
 
 ## Citing the Project
 
