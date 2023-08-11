@@ -277,7 +277,7 @@ class DTPSO_Path_Plan():
         # 画障碍物
         self.map_pyg.fill((255, 255, 255))
         for _ in range(self.Grouped_Obs_Segments.shape[0]):
-            obs_color = (50, 50, 50) if _ < (self.O-2) else (225, 100, 0)
+            obs_color = (50, 50, 50) if _ < (self.O-self.static_obs) else (225, 100, 0)
             pygame.draw.polygon(self.map_pyg, obs_color, self.Grouped_Obs_Segments[_,:,0,:].cpu().int().numpy())
         self.canvas.blit(self.map_pyg, self.map_pyg.get_rect())
 
