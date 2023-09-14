@@ -40,6 +40,7 @@ parser.add_argument('--dynamic_map', type=str2bool, default=True, help='dynamic 
 parser.add_argument('--SEPSO', type=str2bool, default=True, help='Whether use self-evolved params')
 parser.add_argument('--AT', type=str2bool, default=True, help='Whether use Auto Truncation')
 parser.add_argument('--PI', type=str2bool, default=True, help='Whether use Priori Initialization')
+parser.add_argument('--FPS', type=int, default=0, help='Frames Per Second when rendering, 0 for fastest')
 opt = parser.parse_args()
 
 device = torch.device(opt.dvc)
@@ -52,6 +53,7 @@ class DTPSO_Path_Plan():
         self.Search_range = [5., 360.]  # search space of the Particles
         self.arange_idx = torch.arange(self.G, device=self.dvc) # 索引常量
         self.TrucWindow = opt.TrucWindow
+        self.FPS = opt.FPS
 
         # Obstacle Initialization
         self.dynamic_map = opt.dynamic_map
@@ -297,7 +299,7 @@ class DTPSO_Path_Plan():
         self.window.blit(self.canvas, self.map_pyg.get_rect())
         pygame.event.pump()
         pygame.display.update()
-        self.clock.tick(30)
+        self.clock.tick(self.FPS)
 
     def DynamiclyPlan(self, params):
         # 创建先验初始化位置
