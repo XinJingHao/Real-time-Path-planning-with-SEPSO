@@ -9,7 +9,7 @@ import time
 
 
 # Seed Everything
-seed_value = 1
+seed_value = 2
 torch.manual_seed(seed_value)
 torch.cuda.manual_seed(seed_value)
 np.random.seed(seed_value)
@@ -41,9 +41,11 @@ parser.add_argument('--SEPSO', type=str2bool, default=True, help='Whether use se
 parser.add_argument('--AT', type=str2bool, default=True, help='Whether use Auto Truncation')
 parser.add_argument('--PI', type=str2bool, default=True, help='Whether use Priori Initialization')
 parser.add_argument('--FPS', type=int, default=0, help='Frames Per Second when rendering, 0 for fastest')
+parser.add_argument('--Record', type=int, default=0, help='Shortcut record frequency, 0 for not record')
 opt = parser.parse_args()
 
 device = torch.device(opt.dvc)
+if opt.dvc == 'cpu': print('Log: "cpu" is used as running device. Try to use "cuda" to run faster!')
 
 class DTPSO_Path_Plan():
     def __init__(self, opt):
@@ -54,6 +56,7 @@ class DTPSO_Path_Plan():
         self.arange_idx = torch.arange(self.G, device=self.dvc) # 索引常量
         self.TrucWindow = opt.TrucWindow
         self.FPS = opt.FPS
+        self.Record = opt.Record
 
         # Obstacle Initialization
         self.dynamic_map = opt.dynamic_map
@@ -61,8 +64,10 @@ class DTPSO_Path_Plan():
         self.Obs_Segments = torch.load('Generate_Obstacle_Segments/Obstacle_Segments.pt').to(self.dvc) #(M,2,2) or (4*O,2,2)
         self.O = self.Obs_Segments.shape[0] // 4 # 障碍物数量
         self.Grouped_Obs_Segments = self.Obs_Segments.reshape(self.O,4,2,2) #注意Grouped_Obs_Segments 和 Obs_Segments 是联动的
+
         self.Obs_V = torch.randint(-5,5,(self.O,1,1,2), device=self.dvc) #每个障碍物的x方向速度和y方向速度
         self.static_obs = 2
+        self.dynamic_obs = self.O-self.static_obs
         self.Obs_V[-self.static_obs:]*=0 # 最后两个障碍物不动
         self.Obs_X_limit = torch.tensor([46,320], device=self.dvc)
         self.Obs_Y_limit = torch.tensor([0, 366], device=self.dvc)
@@ -92,6 +97,14 @@ class DTPSO_Path_Plan():
 
             # 障碍物图层
             self.map_pyg = pygame.Surface((self.window_size, self.window_size))
+
+            # 障碍物速度
+            self.Grouped_Obs_center = self.Grouped_Obs_Segments.sum(axis=-3)[:, 0, :] # (O,2)
+            self.Normed_Obs_V = (self.Obs_V/((self.Obs_V**2).sum(dim=-1).pow(0.5).unsqueeze(dim=-1)+1e-8)).squeeze() # (O,2)
+            self.Grouped_Obs_Vend = self.Grouped_Obs_center + 15*self.Normed_Obs_V
+
+            # Timestep
+            if self.Record: self.font = pygame.font.Font(None, 36)
 
         self.AT = opt.AT
         self.PI = opt.PI
@@ -275,12 +288,33 @@ class DTPSO_Path_Plan():
                    (self.Grouped_Obs_Segments[:, :, :, 1] > self.Obs_Y_limit[1])).any(dim=-1).any(dim=-1)
         self.Obs_V[Flag_Vy, :, :, 1] *= -1
 
+        if self.render:
+            # 生成障碍物速度箭头
+            self.Grouped_Obs_center = self.Grouped_Obs_Segments.mean(axis=-3)[:, 0, :] # (O,2)
+            self.Normed_Obs_V = (self.Obs_V/((self.Obs_V**2).sum(dim=-1).pow(0.5).unsqueeze(dim=-1)+1e-8)).squeeze() # (O,2)
+            self.Grouped_Obs_Vend = self.Grouped_Obs_center + 20*self.Normed_Obs_V
+
     def _render_frame(self):
-        # 画障碍物
+        Grouped_Obs_center = self.Grouped_Obs_center.int().cpu().numpy()
+        Grouped_Obs_Vend = self.Grouped_Obs_Vend.int().cpu().numpy()
         self.map_pyg.fill((255, 255, 255))
-        for _ in range(self.Grouped_Obs_Segments.shape[0]):
-            obs_color = (50, 50, 50) if _ < (self.O-self.static_obs) else (225, 100, 0)
-            pygame.draw.polygon(self.map_pyg, obs_color, self.Grouped_Obs_Segments[_,:,0,:].cpu().int().numpy())
+
+        # 画静态障碍物
+        for _ in range(self.dynamic_obs, self.dynamic_obs+self.static_obs):
+            pygame.draw.polygon(self.map_pyg, (225, 100, 0), self.Grouped_Obs_Segments[_, :, 0, :].cpu().int().numpy())
+
+        # 画动态障碍物
+        for _ in range(self.dynamic_obs):
+            pygame.draw.polygon(self.map_pyg, (50, 50, 50), self.Grouped_Obs_Segments[_,:,0,:].cpu().int().numpy())
+
+            # 画障碍物速度
+            start, end = pygame.Vector2(Grouped_Obs_center[_, 0], Grouped_Obs_center[_, 1]), pygame.Vector2(Grouped_Obs_Vend[_, 0], Grouped_Obs_Vend[_, 1])
+            direction = end - start
+            arrow_points = [end, end - 12 * direction.normalize().rotate(30),
+                            end - 12 * direction.normalize().rotate(-30)]
+            pygame.draw.line(self.map_pyg, (200, 200, 200), start, end, 3)
+            pygame.draw.polygon(self.map_pyg, (200, 200, 200), arrow_points)
+
         self.canvas.blit(self.map_pyg, self.map_pyg.get_rect())
 
         # 画路径
@@ -297,9 +331,14 @@ class DTPSO_Path_Plan():
         pygame.draw.circle(self.canvas, (0, 255, 0), (self.x_target, self.y_target), 5)  # 终点
 
         self.window.blit(self.canvas, self.map_pyg.get_rect())
+        if self.Record:
+            text = self.font.render(f'Timestep:{self.counter}', True, (150, 150, 150))
+            self.window.blit(text, (115,0))
+
         pygame.event.pump()
         pygame.display.update()
         self.clock.tick(self.FPS)
+
 
     def DynamiclyPlan(self, params):
         # 创建先验初始化位置
@@ -307,21 +346,24 @@ class DTPSO_Path_Plan():
         Priori_X = torch.cat((Priori_X, Priori_X))
         self.Reset(Priori_X.clone(), ratio=0.1, params=params)
 
-        counter, PL, IPP, TPP = 0, 0, 0, 0
+        self.counter, PL, IPP, TPP = 0, 0, 0, 0
         while True:
-            counter += 1
+            self.counter += 1
             t0 = time.time()
             pl, ipp = self.iterate() # Path Lenth, Iterations per Planning
             PL += pl
             IPP += ipp
             TPP += (time.time()-t0) # Time per Planning
 
-            if counter % 100 == 0:
-                print(f'PL:{round(PL/counter,1)}, TPP:{round(TPP/counter,5)}, IPP:{round(IPP/counter,1)}, Exp:{self.ExpName}{counter}')
+            if self.counter % 100 == 0:
+                print(f'PL:{round(PL/self.counter,1)}, TPP:{round(TPP/self.counter,5)}, IPP:{round(IPP/self.counter,1)}, Exp:{self.ExpName}{self.counter}')
 
 
             if self.render: self._render_frame()
             if self.dynamic_map: self._update_map()
+
+            if self.Record and (self.counter%self.Record == 0):
+                pygame.image.save(self.window, f'Recorded_Imgs/{self.counter}.png')
 
             if self.PI: self.ReLocate(self.Kinmtc[3,0,0].clone(), ratio=0.25) # 这里ratio越大，每次Iteration越快，但也更容易陷入局部最优
             else: self.Reset(Priori_X.clone(), ratio=0.25, params=params)
@@ -332,6 +374,10 @@ if __name__ == '__main__':
     opt.start = 20 # 起点X,Y坐标
     opt.target = 350 # 终点X,Y坐标
     dtpso = DTPSO_Path_Plan(opt)
+
+    if opt.Record:
+        try:os.mkdir('Recorded_Imgs')
+        except:pass
 
     if opt.SEPSO:
         # Envolved params:
