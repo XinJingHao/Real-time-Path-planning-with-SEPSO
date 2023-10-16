@@ -46,3 +46,10 @@ To cite this repository in publications:
       primaryClass={cs.RO}
 }
 ```
+## Maintenance History
++ 2023/10/16
+  + **_Real-time-Path-planning-with-SEPSO/Code_for_Path_Plannning/Dynamic Path Planning with SEPSO(Application Phrase)/SEPSO_Path_AP_main.py_** is upgraded:
+    + obstacle velocity can be rendered now
+    + add shortcut recording option
+    + the corresponding 'Obstacle_Segments.pt' is upgraded to avoid oscillation bug
+
