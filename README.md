@@ -5,6 +5,8 @@ This is the code of the paper [Efficient Real-time Path Planning with Self-evolv
   | :----------------------------------------------------------: | :----------------------------------------------------------: |
   | <img src="https://github.com/XinJingHao/Real-time-Path-planning-with-SEPSO/blob/main/Code_for_Path_Plannning/Static%20Path%20Planning%20with%20DTPSO/static.gif" width="320" height="320"> | <img src="https://github.com/XinJingHao/Real-time-Path-planning-with-SEPSO/blob/main/Code_for_Path_Plannning/Dynamic%20Path%20Planning%20with%20SEPSO(Application%20Phrase)/dynamic.gif" width="320" height="320"> |
 
+**Important Note:** We have published the [OkayPlan](https://github.com/XinJingHao/OkayPlan), a new generation of SEPSO. 
+
 ## 1. Dependencies 
 ```python
 torch==2.0.1
